@@ -7,6 +7,6 @@ class Song(models.Model):
 
 
 class Order(models.Model):
-    song = models.ForeignKey('Song')
-    congratulation = models.TextField()
-    datetime = models.DateTimeField()
+    song = models.ForeignKey('Song', on_delete=models.SET_NULL)
+    congratulation = models.TextField(null=True, blank=True)
+    published = models.DateTimeField(auto_now_add=True, db_index=True)
