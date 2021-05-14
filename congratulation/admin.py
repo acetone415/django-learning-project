@@ -9,7 +9,7 @@ class SongAdmin(admin.ModelAdmin):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('song', 'congratulation')
+    list_display = ('song', 'congratulation', 'published')
     list_display_links = ('congratulation',)
 
 
