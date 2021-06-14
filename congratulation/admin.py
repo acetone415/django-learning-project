@@ -26,16 +26,14 @@ class SongAdmin(admin.ModelAdmin):
 
     @staticmethod
     def tracklist_parser(filename):
-        sep = ' - '
+        sep, tracklist = ' - ', []
         with open(filename) as file:
             for line in file:
                 line = re.sub(r'\d+\. ', '', line)
                 author_song = line.rstrip().split(sep=sep)
                 # read pair "author - song title"  and write to tuple (author, song)
-                Song.objects.update_or_create(
-                    author=author_song[0],
-                    title=author_song[1]
-                )
+                tracklist.append(author_song)
+        return tracklist
 
     def upload_tracklist(self, request):
         """Upload trcklist file to admin panel"""
@@ -45,7 +43,12 @@ class SongAdmin(admin.ModelAdmin):
             file_data = tracklist_file.read().decode('utf-8-sig')
             with open(TRACKLIST_FILENAME, 'w') as f:
                 f.write(file_data)
+            tracklist = SongAdmin.tracklist_parser(TRACKLIST_FILENAME)
             Song.objects.all().delete()
+            Song.objects.bulk_create(
+                [Song(author=pair[0],
+                      title=pair[1]) for pair in tracklist]
+            )
             SongAdmin.tracklist_parser(TRACKLIST_FILENAME)
 
         form = TracklistImportForm()
