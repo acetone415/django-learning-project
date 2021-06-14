@@ -7,6 +7,9 @@ import re
 from .models import Song, Order
 
 
+TRACKLIST_FILENAME = settings.MEDIA_ROOT / 'tracklist.txt'
+
+
 class TracklistImportForm(forms.Form):
     tracklist_upload = forms.FileField()
 
@@ -21,19 +24,11 @@ class SongAdmin(admin.ModelAdmin):
         new_urls = [path('upload-tracklist/', self.upload_tracklist), ]
         return new_urls + urls
 
-    def upload_tracklist(self, request):
-
-        if request.method == "POST":
-            tracklist_file = request.FILES["tracklist_upload"]
-            file_data = tracklist_file.read().decode('utf-8-sig')
-            with open(settings.MEDIA_ROOT / 'tracklist.txt', 'w') as f:
-                f.write(file_data)
-            file_data = file_data.splitlines()
-
-            sep = ' - '
-
-            Song.objects.all().delete()
-            for line in file_data:
+    @staticmethod
+    def tracklist_parser(filename):
+        sep = ' - '
+        with open(filename) as file:
+            for line in file:
                 line = re.sub(r'\d+\. ', '', line)
                 author_song = line.rstrip().split(sep=sep)
                 # read pair "author - song title"  and write to tuple (author, song)
@@ -41,6 +36,17 @@ class SongAdmin(admin.ModelAdmin):
                     author=author_song[0],
                     title=author_song[1]
                 )
+
+    def upload_tracklist(self, request):
+        """Upload trcklist file to admin panel"""
+
+        if request.method == "POST":
+            tracklist_file = request.FILES["tracklist_upload"]
+            file_data = tracklist_file.read().decode('utf-8-sig')
+            with open(TRACKLIST_FILENAME, 'w') as f:
+                f.write(file_data)
+            Song.objects.all().delete()
+            SongAdmin.tracklist_parser(TRACKLIST_FILENAME)
 
         form = TracklistImportForm()
         data = {'form': form}
