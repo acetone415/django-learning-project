@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.shortcuts import render
 from django.urls import path
@@ -24,17 +25,22 @@ class SongAdmin(admin.ModelAdmin):
 
         if request.method == "POST":
             tracklist_file = request.FILES["tracklist_upload"]
-        file_data = tracklist_file.read().decode('utf-8-sig').splitlines()
+            file_data = tracklist_file.read().decode('utf-8-sig')
+            with open(settings.MEDIA_ROOT / 'tracklist.txt', 'w') as f:
+                f.write(file_data)
+            file_data = file_data.splitlines()
 
-        sep, tracklist = ' - ', []
-        for line in file_data:
-            line = re.sub(r'\d+\. ', '', line)
-            author_song = line.rstrip().split(sep=sep)
-            # read pair "author - song title"  and write to tuple (author, song)
-            Song.objects.update_or_create(
-                author=author_song[0],
-                title=author_song[1]
-            )
+            sep = ' - '
+
+            Song.objects.all().delete()
+            for line in file_data:
+                line = re.sub(r'\d+\. ', '', line)
+                author_song = line.rstrip().split(sep=sep)
+                # read pair "author - song title"  and write to tuple (author, song)
+                Song.objects.update_or_create(
+                    author=author_song[0],
+                    title=author_song[1]
+                )
 
         form = TracklistImportForm()
         data = {'form': form}

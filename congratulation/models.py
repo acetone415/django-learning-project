@@ -16,7 +16,7 @@ class Song(models.Model):
 
 
 class Order(models.Model):
-    song = models.ForeignKey('Song', on_delete=models.PROTECT,
+    song = models.ForeignKey('Song', on_delete=models.CASCADE,
                              verbose_name='Песня')
     congratulation = models.TextField(null=True, blank=True,
                                       verbose_name='Текст поздравления')
