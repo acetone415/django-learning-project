@@ -1,9 +1,10 @@
 from django import forms
 from django.conf import settings
 from django.contrib import admin
-from django.shortcuts import render
-from django.urls import path
+from django.shortcuts import render, redirect
+from django.urls import path, reverse_lazy
 import re
+
 from .models import Song, Order
 
 
@@ -21,7 +22,12 @@ class SongAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         urls = super().get_urls()
-        new_urls = [path('upload-tracklist/', self.upload_tracklist), ]
+        new_urls = [
+            path('upload-tracklist/', self.upload_tracklist,
+                 name='upload_tracklist'),
+            path('update-tracklist/', SongAdmin.update_tracklist,
+                 name='update_tracklist'),
+        ]
         return new_urls + urls
 
     @staticmethod
@@ -35,6 +41,15 @@ class SongAdmin(admin.ModelAdmin):
                 tracklist.append(author_song)
         return tracklist
 
+    @staticmethod
+    def update_tracklist(*args):
+        tracklist = SongAdmin.tracklist_parser(TRACKLIST_FILENAME)
+        Song.objects.all().delete()
+        for pair in tracklist:
+            Song.objects.update_or_create(author=pair[0], title=pair[1])
+        if args:
+            return redirect(reverse_lazy('admin:congratulation_song_changelist'))
+
     def upload_tracklist(self, request):
         """Upload trcklist file to admin panel"""
 
@@ -43,19 +58,12 @@ class SongAdmin(admin.ModelAdmin):
             file_data = tracklist_file.read().decode('utf-8-sig')
             with open(TRACKLIST_FILENAME, 'w') as f:
                 f.write(file_data)
-            tracklist = SongAdmin.tracklist_parser(TRACKLIST_FILENAME)
-            Song.objects.all().delete()
-            Song.objects.bulk_create(
-                [Song(author=pair[0],
-                      title=pair[1]) for pair in tracklist]
-            )
-            SongAdmin.tracklist_parser(TRACKLIST_FILENAME)
+            SongAdmin.update_tracklist()
 
         form = TracklistImportForm()
         data = {'form': form}
 
         return render(request, "admin/upload_tracklist.html", data)
-
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('song', 'congratulation', 'published')
