@@ -1,12 +1,12 @@
+import re
+
 from django import forms
 from django.conf import settings
 from django.contrib import admin
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.urls import path, reverse_lazy
-import re
 
-from .models import Song, Order
-
+from .models import Order, Song
 
 TRACKLIST_FILENAME = settings.MEDIA_ROOT / 'tracklist.txt'
 

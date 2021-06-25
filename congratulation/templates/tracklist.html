@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Треклист</title>
+    </head>
+    <body>
+        <h2>Треклист</h2>
+        {% for song in songs %}
+        <div>{{ song.author }} - {{ song.title }}</div>
+        {% endfor %}
+    </body>
+</html>
