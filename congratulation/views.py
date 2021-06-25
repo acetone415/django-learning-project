@@ -1,7 +1,10 @@
+from django.views.generic import CreateView
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
+from django.urls import reverse_lazy
 
+from .forms import OrderForm
 from .models import Song
 
 
@@ -16,5 +19,7 @@ def show_tracklist(request):
     return HttpResponse(template.render(context, request))
 
 
-def make_order(request):
-    return HttpResponse('Soon you will order here)')
+class OrderCreateView(CreateView):
+    template_name = 'order.html'
+    form_class = OrderForm
+    success_url = reverse_lazy('index')
