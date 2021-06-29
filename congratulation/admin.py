@@ -1,4 +1,5 @@
 import re
+from typing import List, Tuple
 
 from django import forms
 from django.conf import settings
@@ -31,7 +32,11 @@ class SongAdmin(admin.ModelAdmin):
         return new_urls + urls
 
     @staticmethod
-    def tracklist_parser(filename):
+    def tracklist_parser(filename: str) -> List[Tuple[str, str]]:
+        """Load new tracklist from file to DB.
+
+        :param filename: Tracklist filename
+        """
         sep, tracklist = ' - ', []
         with open(filename) as file:
             for line in file:
@@ -64,6 +69,7 @@ class SongAdmin(admin.ModelAdmin):
         data = {'form': form}
 
         return render(request, "admin/upload_tracklist.html", data)
+
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('song', 'congratulation', 'published')

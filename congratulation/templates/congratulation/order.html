@@ -1,15 +1,10 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Создание поздравления</title>
-    </head>
-    <body>
+{% extends "layout/basic.html" %}
+{% block title %}Создание поздравления{% endblock %}
+{% block content %}
         <h1>Создание поздравления</h1>
         <form method="POST">
             {% csrf_token %}
             {{ form.as_p }}
             <input type="submit" value="Отправить">
         </form>
-    </body>
-</html>
+{% endblock %}
